@@ -1,4 +1,4 @@
-# Hostel WiFi Auto Login
+# Hostel WiFi Auto Login 
 
 This tool automatically detects when your WiFi connection is lost and handles the sign-in process for your hostel WiFi portal. It can also automatically trigger when you connect to your WiFi network, even when offline, by immediately filling in your login details.
 
@@ -12,8 +12,7 @@ This tool automatically detects when your WiFi connection is lost and handles th
 - Runs in the background with minimal resource usage
 - Logs all activities for troubleshooting
 
-## Requirements
-
+## Requirements for installation
 - Python 3.6 or higher
 - Chrome browser installed
 - ChromeDriver (will be automatically installed by Selenium)
