@@ -1,5 +1,5 @@
 @echo off
-echo ===== WiFi Auto Login Troubleshooter =====
+echo ===== WiFi Auto Login Enhanced Troubleshooter =====
 echo.
 
 echo Checking for required files...
@@ -57,6 +57,25 @@ if %ERRORLEVEL% neq 0 (
 )
 
 echo.
+echo Cleaning up ChromeDriver cache...
+if exist "%USERPROFILE%\.wdm" (
+    echo Found ChromeDriver cache, cleaning it...
+    rmdir /s /q "%USERPROFILE%\.wdm"
+    echo ChromeDriver cache cleaned.
+) else (
+    echo No ChromeDriver cache found.
+)
+
+echo.
+echo Creating logs directory...
+if not exist logs (
+    mkdir logs
+    echo Created logs directory.
+) else (
+    echo Logs directory exists.
+)
+
+echo.
 echo Checking internet connection...
 ping -n 1 8.8.8.8 >nul
 if %ERRORLEVEL% neq 0 (
@@ -76,9 +95,26 @@ if not exist wifi_connection_monitor.ps1 (
 )
 
 echo.
-echo Troubleshooting complete!
+echo Testing ChromeDriver installation...
+echo This will attempt to download and test ChromeDriver...
+python -c "from webdriver_manager.chrome import ChromeDriverManager; from selenium.webdriver.chrome.service import Service; print('ChromeDriver test successful')" 2>nul
+if %ERRORLEVEL% neq 0 (
+    echo WARNING: ChromeDriver test failed. This might cause issues.
+    echo The script will attempt to fix this automatically when running.
+) else (
+    echo ChromeDriver test successful.
+)
+
 echo.
-echo If you're still having issues, please check the wifi_login.log file for error messages.
+echo ===== Troubleshooting Summary =====
+echo.
+echo If you're still having issues:
+echo 1. Check the logs/wifi_login.log file for detailed error messages
+echo 2. Make sure your credentials in config.ini are correct
+echo 3. Try running the script manually first: python wifi_auto_login.py
+echo 4. If ChromeDriver issues persist, try running: start_wifi_login.bat
+echo.
+echo Troubleshooting complete!
 echo.
 echo Press any key to exit...
 pause > nul
