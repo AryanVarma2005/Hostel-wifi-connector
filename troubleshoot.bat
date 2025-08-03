@@ -1,5 +1,5 @@
 @echo off
-echo ===== WiFi Auto Login Enhanced Troubleshooter =====
+echo ===== WiFi Auto Login Troubleshooter =====
 echo.
 
 echo Checking for required files...
@@ -47,26 +47,6 @@ echo Installing/updating required packages...
 pip install -r requirements.txt
 
 echo.
-echo Checking Chrome installation...
-where chrome 2>nul
-if %ERRORLEVEL% neq 0 (
-    echo WARNING: Chrome not found in PATH.
-    echo Please make sure Google Chrome is installed.
-) else (
-    echo Chrome is installed.
-)
-
-echo.
-echo Cleaning up ChromeDriver cache...
-if exist "%USERPROFILE%\.wdm" (
-    echo Found ChromeDriver cache, cleaning it...
-    rmdir /s /q "%USERPROFILE%\.wdm"
-    echo ChromeDriver cache cleaned.
-) else (
-    echo No ChromeDriver cache found.
-)
-
-echo.
 echo Creating logs directory...
 if not exist logs (
     mkdir logs
@@ -86,43 +66,37 @@ if %ERRORLEVEL% neq 0 (
 )
 
 echo.
-echo Checking WiFi connection monitor...
-if not exist wifi_connection_monitor.ps1 (
-    echo WARNING: wifi_connection_monitor.ps1 not found!
-    echo This file is required for automatic WiFi connection detection.
-) else (
-    echo FOUND: wifi_connection_monitor.ps1
-)
-
-echo.
-echo Testing ChromeDriver installation...
-echo This will attempt to download and test ChromeDriver...
-python -c "from webdriver_manager.chrome import ChromeDriverManager; from selenium.webdriver.chrome.service import Service; print('ChromeDriver test successful')" 2>nul
+echo Testing WiFi login endpoint...
+echo Testing connection to the captive portal...
+python -c "import requests; import urllib3; urllib3.disable_warnings(); r = requests.get('https://172.16.16.16:8090/httpclient.html', verify=False, timeout=5); print('Captive portal is accessible')" 2>nul
 if %ERRORLEVEL% neq 0 (
-    echo WARNING: ChromeDriver test failed. This might cause issues.
-    echo The script will attempt to fix this automatically when running.
+    echo WARNING: Could not reach the captive portal.
+    echo This might be normal if you're not connected to the WiFi network.
 ) else (
-    echo ChromeDriver test successful.
+    echo Captive portal is accessible.
 )
 
 echo.
-echo ===== Troubleshooting Summary =====
+echo ===== Troubleshooting Complete =====
 echo.
-echo If you're still having issues:
-echo 1. Check the logs/wifi_login.log file for detailed error messages
-echo 2. Make sure your credentials in config.ini are correct
-echo 3. Try running the script manually first: python wifi_auto_login.py
-echo 4. If ChromeDriver issues persist, try running: start_wifi_login.bat
+echo If all checks passed, try running:
+echo   direct_login.bat
 echo.
-echo Troubleshooting complete!
+echo For continuous monitoring, run:
+echo   start_wifi_login.bat
 echo.
-echo Press any key to exit...
-pause > nul
-goto :eof
+echo Check logs/wifi_login.log for detailed information.
+echo.
+goto :end
 
 :error
 echo.
-echo Troubleshooting failed! Please fix the errors above before continuing.
+echo ===== Troubleshooting Failed =====
+echo Please fix the errors above and run this script again.
 echo.
-echo Press any key to exit...
-pause > nul
+pause
+goto :eof
+
+:end
+echo Troubleshooting completed successfully!
+pause

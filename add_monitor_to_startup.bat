@@ -1,3 +1,0 @@
-@echo off
-echo Adding WiFi Connection Monitor to Windows startup...
-powershell -ExecutionPolicy Bypass -File "%~dp0add_monitor_to_startup.ps1"

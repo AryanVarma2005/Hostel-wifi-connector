@@ -9,14 +9,7 @@ import sys
 import shutil
 import tempfile
 from datetime import datetime
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException, NoSuchElementException, WebDriverException
+
 import urllib3
 
 # Disable SSL warnings
@@ -72,74 +65,14 @@ class HostelWifiLogin:
         # Get check interval from config
         self.check_interval = self.config.getint('Settings', 'check_interval')
         
-        # Setup Chrome options with better stability
-        self.chrome_options = Options()
-        self.chrome_options.add_argument("--headless")  # Run in background
-        self.chrome_options.add_argument("--no-sandbox")
-        self.chrome_options.add_argument("--disable-dev-shm-usage")
-        self.chrome_options.add_argument('--ignore-certificate-errors')
-        self.chrome_options.add_argument('--ignore-ssl-errors')
-        self.chrome_options.add_argument('--disable-extensions')
-        self.chrome_options.add_argument('--disable-gpu')
-        self.chrome_options.add_argument('--disable-web-security')
-        self.chrome_options.add_argument('--allow-running-insecure-content')
-        self.chrome_options.add_argument('--disable-features=VizDisplayCompositor')
-        self.chrome_options.add_argument('--disable-background-timer-throttling')
-        self.chrome_options.add_argument('--disable-backgrounding-occluded-windows')
-        self.chrome_options.add_argument('--disable-renderer-backgrounding')
-        self.chrome_options.add_argument('--disable-features=TranslateUI')
-        self.chrome_options.add_argument('--disable-ipc-flooding-protection')
-        
-        # Add user agent to avoid detection
-        self.chrome_options.add_argument('--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')
+
         
         self.connected = False
         self.consecutive_failures = 0
         self.max_consecutive_failures = 5
         logging.info("WiFi Auto Login initialized with enhanced error handling")
 
-    def cleanup_chromedriver_cache(self):
-        """Clean up corrupted ChromeDriver cache"""
-        try:
-            cache_dir = os.path.expanduser("~/.wdm")
-            if os.path.exists(cache_dir):
-                logging.info("Cleaning up ChromeDriver cache...")
-                shutil.rmtree(cache_dir)
-                logging.info("ChromeDriver cache cleaned")
-                return True
-        except Exception as e:
-            logging.error(f"Error cleaning ChromeDriver cache: {e}")
-        return False
 
-    def get_chromedriver_service(self):
-        """Get ChromeDriver service with fallback mechanisms"""
-        try:
-            # First try with webdriver_manager
-            driver_path = ChromeDriverManager().install()
-            logging.info(f"ChromeDriver installed at: {driver_path}")
-            return Service(driver_path)
-        except Exception as e:
-            logging.error(f"Error with webdriver_manager: {e}")
-            
-            # Try to clean cache and retry
-            if self.cleanup_chromedriver_cache():
-                try:
-                    driver_path = ChromeDriverManager().install()
-                    logging.info(f"ChromeDriver reinstalled at: {driver_path}")
-                    return Service(driver_path)
-                except Exception as e2:
-                    logging.error(f"Error after cache cleanup: {e2}")
-            
-            # Fallback: try to find ChromeDriver in PATH
-            try:
-                chrome_path = shutil.which("chromedriver")
-                if chrome_path:
-                    logging.info(f"Using ChromeDriver from PATH: {chrome_path}")
-                    return Service(chrome_path)
-            except Exception as e3:
-                logging.error(f"Error finding ChromeDriver in PATH: {e3}")
-            
-            raise Exception("Could not initialize ChromeDriver")
 
     def check_internet_connection(self):
         """Check if there is an active internet connection with multiple fallbacks"""
@@ -177,185 +110,57 @@ class HostelWifiLogin:
         return False
 
     def login(self):
-        """Attempt to login to the hostel WiFi portal with enhanced error handling"""
-        driver = None
+        """Attempt to login to the hostel WiFi portal using direct HTTP requests"""
         try:
             logging.info("Attempting to login to WiFi portal")
             
-            # Get ChromeDriver service with fallback
-            service = self.get_chromedriver_service()
+            # Create a session for the requests
+            session = requests.Session()
+            session.verify = False
+            session.headers.update({
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+            })
             
-            # Create driver with retry mechanism
-            max_retries = 3
-            for attempt in range(max_retries):
-                try:
-                    driver = webdriver.Chrome(service=service, options=self.chrome_options)
-                    break
-                except Exception as e:
-                    logging.warning(f"Driver creation attempt {attempt + 1} failed: {e}")
-                    if attempt == max_retries - 1:
-                        raise
-                    time.sleep(2)
+            # Use the specific endpoint that works for this captive portal
+            login_endpoint = self.login_url.replace('httpclient.html', 'login.xml')
             
-            # Set page load timeout
-            driver.set_page_load_timeout(30)
-            driver.implicitly_wait(10)
+            # Prepare login data based on the working configuration
+            login_data = {
+                'username': self.username,
+                'password': self.password,
+                'mode': '191',  # Common mode for captive portals
+                'btnSubmit': 'Login'
+            }
             
-            # Navigate to login page
-            logging.info(f"Navigating to: {self.login_url}")
-            driver.get(self.login_url)
+            logging.info(f"Using login endpoint: {login_endpoint}")
+            response = session.post(login_endpoint, data=login_data, timeout=10)
+            logging.info(f"Login response status: {response.status_code}")
             
-            # Wait for the login page to load with multiple fallback strategies
-            username_field = None
-            wait = WebDriverWait(driver, 15)
-            
-            try:
-                username_field = wait.until(
-                    EC.presence_of_element_located((By.ID, self.username_field_id))
-                )
-            except TimeoutException:
-                # Try alternative selectors
-                alternative_selectors = [
-                    (By.NAME, "username"),
-                    (By.NAME, "user"),
-                    (By.CSS_SELECTOR, "input[type='text']"),
-                    (By.XPATH, "//input[@type='text']")
-                ]
-                
-                for selector_type, selector_value in alternative_selectors:
-                    try:
-                        username_field = driver.find_element(selector_type, selector_value)
-                        logging.info(f"Found username field using {selector_type}: {selector_value}")
-                        break
-                    except NoSuchElementException:
-                        continue
-                
-                if not username_field:
-                    raise Exception("Could not find username field")
-            
-            # Find password field
-            password_field = None
-            try:
-                password_field = driver.find_element(By.ID, self.password_field_id)
-            except NoSuchElementException:
-                # Try alternative selectors for password
-                alternative_password_selectors = [
-                    (By.NAME, "password"),
-                    (By.NAME, "pass"),
-                    (By.CSS_SELECTOR, "input[type='password']"),
-                    (By.XPATH, "//input[@type='password']")
-                ]
-                
-                for selector_type, selector_value in alternative_password_selectors:
-                    try:
-                        password_field = driver.find_element(selector_type, selector_value)
-                        logging.info(f"Found password field using {selector_type}: {selector_value}")
-                        break
-                    except NoSuchElementException:
-                        continue
-                
-                if not password_field:
-                    raise Exception("Could not find password field")
-            
-            # Clear fields and fill in credentials
-            username_field.clear()
-            username_field.send_keys(self.username)
-            password_field.clear()
-            password_field.send_keys(self.password)
-            
-            # Submit the form with multiple strategies
-            login_success = False
-            
-            # Strategy 1: Try to find and click the button by ID
-            try:
-                submit_button = driver.find_element(By.ID, self.login_button_id)
-                submit_button.click()
-                logging.info("Clicked login button by ID")
-                login_success = True
-            except NoSuchElementException:
-                logging.info("Login button not found by ID, trying alternative methods")
-                
-                # Strategy 2: Try JavaScript function
-                try:
-                    driver.execute_script("submitRequest()")
-                    logging.info("Executed submitRequest() JavaScript function")
-                    login_success = True
-                except Exception as js_error:
-                    logging.info(f"JavaScript execution failed: {js_error}")
-                    
-                    # Strategy 3: Try to find button by text or other attributes
-                    button_selectors = [
-                        (By.XPATH, "//button[contains(text(), 'Login')]"),
-                        (By.XPATH, "//button[contains(text(), 'Sign In')]"),
-                        (By.XPATH, "//input[@type='submit']"),
-                        (By.XPATH, "//a[contains(@href, 'javascript:submitRequest()')]"),
-                        (By.CSS_SELECTOR, "button[type='submit']"),
-                        (By.CSS_SELECTOR, "input[type='submit']")
-                    ]
-                    
-                    for selector_type, selector_value in button_selectors:
-                        try:
-                            button = driver.find_element(selector_type, selector_value)
-                            button.click()
-                            logging.info(f"Clicked button using {selector_type}: {selector_value}")
-                            login_success = True
-                            break
-                        except NoSuchElementException:
-                            continue
-                    
-                    # Strategy 4: Try form submission
-                    if not login_success:
-                        try:
-                            form = driver.find_element(By.TAG_NAME, "form")
-                            form.submit()
-                            logging.info("Submitted form directly")
-                            login_success = True
-                        except Exception as form_error:
-                            logging.error(f"Form submission failed: {form_error}")
-            
-            if not login_success:
-                raise Exception("Could not submit login form")
-            
-            # Wait for successful login (URL change or redirect)
-            try:
-                # Wait for URL to change
-                original_url = driver.current_url
-                wait.until(lambda d: d.current_url != original_url)
-                logging.info("Login successful - URL changed")
-            except TimeoutException:
-                # Check if we're still on the login page
-                if "login" in driver.current_url.lower() or "auth" in driver.current_url.lower():
-                    raise Exception("Still on login page after submission")
+            # Check if login was successful
+            if response.status_code == 200:
+                # Wait a moment for the connection to establish
+                time.sleep(2)
+                if self.check_internet_connection():
+                    logging.info("Login successful - internet connection confirmed")
+                    self.consecutive_failures = 0  # Reset failure counter
+                    return True
                 else:
-                    logging.info("Login appears successful - not on login page")
-            
-            # Test if login actually worked by checking internet
-            time.sleep(3)  # Wait a bit for connection to establish
-            if self.check_internet_connection():
-                logging.info("Internet connection confirmed after login")
-                self.consecutive_failures = 0  # Reset failure counter
-                return True
+                    logging.warning("Login response received but internet not available yet")
+                    return False
             else:
-                logging.warning("Login submitted but internet not available")
+                logging.error(f"Login failed with status code: {response.status_code}")
                 return False
-            
+                
         except Exception as e:
             logging.error(f"Error during login: {e}")
             self.consecutive_failures += 1
             
-            # If we have too many consecutive failures, clean up ChromeDriver cache
+            # If we have too many consecutive failures, reset counter
             if self.consecutive_failures >= self.max_consecutive_failures:
-                logging.warning(f"Too many consecutive failures ({self.consecutive_failures}), cleaning ChromeDriver cache")
-                self.cleanup_chromedriver_cache()
+                logging.warning(f"Too many consecutive failures ({self.consecutive_failures}), resetting counter")
                 self.consecutive_failures = 0
             
             return False
-        finally:
-            if driver:
-                try:
-                    driver.quit()
-                except Exception as e:
-                    logging.error(f"Error closing driver: {e}")
 
     def monitor_connection(self):
         """Continuously monitor the WiFi connection and login when needed with enhanced error handling"""

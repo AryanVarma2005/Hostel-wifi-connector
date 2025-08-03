@@ -1,3 +1,0 @@
-@echo off
-echo Starting WiFi Connection Monitor...
-powershell -ExecutionPolicy Bypass -File "%~dp0wifi_connection_monitor.ps1"

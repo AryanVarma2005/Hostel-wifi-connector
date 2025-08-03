@@ -1,255 +1,187 @@
-# Hostel WiFi Auto Login (Enhanced Version)
+# Hostel WiFi Auto Login
 
-This tool automatically detects when your WiFi connection is lost and handles the sign-in process for your hostel WiFi portal. It can also automatically trigger when you connect to your WiFi network, even when offline, by immediately filling in your login details.
-
-## 🚀 New Features in Enhanced Version
-
-- **Automatic Recovery**: Script automatically restarts if it crashes or stops working
-- **ChromeDriver Cache Management**: Automatically cleans corrupted ChromeDriver cache
-- **Multiple Fallback Strategies**: Uses multiple methods to find and interact with login elements
-- **Enhanced Error Handling**: Comprehensive error recovery and logging
-- **Service Mode**: Run as a Windows service with automatic monitoring
-- **Rotating Logs**: Prevents log files from growing too large
-- **Multiple Connection Tests**: Tests multiple servers to verify internet connectivity
-- **Automatic Restart**: Built-in restart mechanism for long-term reliability
+A simple and reliable WiFi auto-login script for hostel captive portals. This script automatically detects when you're connected to the WiFi network and logs you in using your credentials.
 
 ## Features
 
-- Monitors internet connectivity continuously
-- Automatically detects when connection is lost
-- Automatically logs into the hostel WiFi portal
-- Can trigger automatically when connecting to WiFi networks
-- Works offline - immediately fills login details when a new connection is detected
-- Runs in the background with minimal resource usage
-- Logs all activities for troubleshooting
-- **NEW**: Automatic recovery and restart on failure
-- **NEW**: ChromeDriver cache cleanup and management
-- **NEW**: Multiple fallback strategies for login elements
-- **NEW**: Service mode for Windows startup
+- ✅ **Automatic Login**: Detects when WiFi connection is available and logs in automatically
+- ✅ **Continuous Monitoring**: Monitors your connection and re-logs in when needed
+- ✅ **No Browser Dependencies**: Uses direct HTTP requests (no ChromeDriver or Selenium needed)
+- ✅ **Error Recovery**: Automatically restarts if it encounters errors
+- ✅ **Windows Startup**: Can be configured to start automatically on boot
+- ✅ **Logging**: Detailed logs for troubleshooting
 
-## Requirements for installation
-- Python 3.6 or higher
-- Chrome browser installed
-- ChromeDriver (will be automatically installed by Selenium)
+## Quick Start
 
-## Setup Instructions
+### 1. Setup
 
-1. Update your login credentials using one of these methods:
-
-   **Option A: Use the credential update tool (Recommended)**
-   
-   Run the `update_credentials.bat` file and follow the prompts to enter your username and password.
-   
-   **Option B: Edit the config file manually**
-   
-   Edit the `config.ini` file and update the following settings with your information:
-   ```ini
-   [WiFiLogin]
-   # College WiFi login page URL (already configured)
-   login_url = https://172.16.16.16:8090/httpclient.html
-   
-   # Replace with your login credentials
-   username = your_username
-   password = your_password
-   
-   [Settings]
-   # Check interval in seconds (how often to check if WiFi is connected)
-   check_interval = 30
-   
-   # Element IDs on the login page (already configured for your college WiFi)
-   username_field_id = username
-   password_field_id = password
-   login_button_id = loginbutton
+1. **Install Python** (3.6 or higher) from [python.org](https://www.python.org/downloads/)
+2. **Download this project** to your computer
+3. **Configure your credentials** by running:
+   ```bash
+   update_credentials.bat
    ```
 
-2. The element IDs (`username_field_id`, `password_field_id`, and `login_button_id`) should match the actual HTML element IDs on your hostel's login page. You may need to inspect the login page to find the correct IDs.
+### 2. Test the Login
 
-   **Note for College WiFi (172.16.16.16:8090)**: The script has been configured for this specific login page. The login button uses a JavaScript function called `submitRequest()` which the script will automatically handle.
+Run a one-time login test:
+```bash
+direct_login.bat
+```
+
+### 3. Start Continuous Monitoring
+
+For automatic monitoring and login:
+```bash
+start_wifi_login.bat
+```
+
+## Configuration
+
+The script uses `config.ini` for configuration. You can edit it manually or use the provided tools:
+
+### Manual Configuration
+1. Copy `config_template.ini` to `config.ini`
+2. Edit `config.ini`:
+```ini
+[WiFiLogin]
+login_url = https://172.16.16.16:8090/httpclient.html
+username = YOUR_USERNAME
+password = YOUR_PASSWORD
+
+[Settings]
+check_interval = 30
+username_field_id = username
+password_field_id = password
+login_button_id = loginbutton
+```
+
+### Using the Update Tool
+```bash
+update_credentials.bat
+```
+
+**Note**: The `config.ini` file with your credentials is protected by `.gitignore` and will not be uploaded to the repository. Use `config_template.ini` as a starting point.
 
 ## Usage
 
-### Quick Start (Recommended)
-
-1. **Run the enhanced startup script**:
-   ```
-   start_wifi_login.bat
-   ```
-   This will install dependencies, clean ChromeDriver cache, and start the script with automatic recovery.
-
-### Service Mode (Best for Long-term Use)
-
-1. **Install as Windows service**:
-   ```
-   manage_service.bat install
-   ```
-
-2. **Start the service**:
-   ```
-   manage_service.bat start
-   ```
-
-3. **Check service status**:
-   ```
-   manage_service.bat status
-   ```
-
-4. **Stop the service**:
-   ```
-   manage_service.bat stop
-   ```
-
-5. **Uninstall the service**:
-   ```
-   manage_service.bat uninstall
-   ```
-
-### Manual Start
-
-1. Install the required packages:
-   ```
-   pip install -r requirements.txt
-   ```
-
-2. Run the script:
-   ```
-   python wifi_auto_login.py
-   ```
-
-### Direct Login
-
-If you want to manually trigger a login attempt without checking internet connectivity first:
-
-```
+### Direct Login (One-time)
+```bash
 python wifi_auto_login.py --direct-login
 ```
 
-## Run on Startup (Windows)
+### Continuous Monitoring
+```bash
+python wifi_auto_login.py
+```
 
-### Method 1: Service Mode (Recommended)
+### Using Batch Files
+- **`direct_login.bat`** - One-time login test
+- **`start_wifi_login.bat`** - Start continuous monitoring with auto-restart
 
-1. Install the service:
-   ```
-   manage_service.bat install
-   ```
+## Windows Startup
 
-2. The WiFi Auto Login will now run automatically when you log in to your computer and restart automatically if it fails.
+To make the script start automatically when you log in to Windows:
 
-### Method 2: Automatic Recovery Monitor
+```bash
+add_to_startup.ps1
+```
 
-1. Double-click the `auto_recovery_monitor.bat` file
-2. This will start a monitor that continuously runs the WiFi login and restarts it if it fails
-
-### Method 3: Standard Startup
-
-1. Right-click on `add_to_startup.ps1` and select "Run with PowerShell"
-2. The script will create a shortcut in your Windows startup folder
-3. The WiFi Auto Login will now run automatically when you log in to your computer
-
-### Method 4: WiFi Connection Monitoring
-
-To automatically trigger the login process when you connect to WiFi:
-
-1. Double-click the `add_monitor_to_startup.bat` file
-2. This will add the WiFi Connection Monitor to your Windows startup
-3. The monitor will detect when you connect to WiFi networks and automatically trigger the login process
+This will add the WiFi auto-login to your Windows startup folder.
 
 ## Troubleshooting
 
-### Automatic Troubleshooting
-
-Run the enhanced troubleshooting script:
-
-```
+### Run the Troubleshooter
+```bash
 troubleshoot.bat
 ```
 
-This script will check for:
-- Required files (wifi_auto_login.py, config.ini, requirements.txt)
+This will check:
 - Python installation
-- Required Python packages
-- Chrome browser installation
+- Required packages
+- Configuration files
 - Internet connection
-- ChromeDriver cache cleanup
-- Common configuration errors
+- Captive portal accessibility
 
-### Manual Troubleshooting
+### Check Logs
+Logs are stored in the `logs/` directory:
+- `logs/wifi_login.log` - Main application logs
 
-Check the `logs/wifi_login.log` file for error messages and debugging information.
+### Common Issues
 
-### Common Issues and Solutions
+1. **"Config file not found"**
+   - Run `update_credentials.bat` to create the config file
 
-1. **ChromeDriver errors**: The enhanced version automatically cleans ChromeDriver cache and uses multiple fallback strategies. If issues persist, run `troubleshoot.bat`.
+2. **"Python not found"**
+   - Install Python from [python.org](https://www.python.org/downloads/)
+   - Make sure to check "Add Python to PATH" during installation
 
-2. **Script can't find login elements**: The enhanced version uses multiple strategies to find login elements. If it still fails, you may need to update the element IDs in the config.ini file.
+3. **"Login failed"**
+   - Check your credentials in `config.ini`
+   - Verify you're connected to the WiFi network
+   - Check the logs for detailed error messages
 
-3. **Script crashes after long periods**: The enhanced version includes automatic recovery and restart mechanisms. Use service mode for the most reliable long-term operation.
+4. **"No internet connection"**
+   - This is normal if you're not logged in to the WiFi
+   - The script will automatically attempt to log in
 
-4. **Login page not loading**: Verify that the login URL in config.ini is correct and accessible.
+## How It Works
 
-5. **Script doesn't detect disconnection**: The script checks connectivity based on the interval set in config.ini. You can adjust this value if needed.
+The script works by:
 
-### Recovery Options
+1. **Monitoring Connection**: Checks if internet is available every 30 seconds
+2. **Detecting Captive Portal**: When no internet is available, it attempts to log in
+3. **Direct HTTP Login**: Sends login credentials directly to the captive portal endpoint
+4. **Verification**: Confirms successful login by checking internet connectivity
+5. **Auto-Recovery**: Restarts automatically if it encounters errors
 
-If the script stops working:
+## Technical Details
 
-1. **Quick fix**: Run `start_wifi_login.bat` - this will clean cache and restart
-2. **Service restart**: Run `manage_service.bat restart`
-3. **Full reset**: Run `troubleshoot.bat` then `start_wifi_login.bat`
+- **Login Endpoint**: `https://172.16.16.16:8090/login.xml`
+- **Method**: HTTP POST with form data
+- **Dependencies**: `requests`, `configparser`, `urllib3`
+- **Compatibility**: Windows 10/11 with Python 3.6+
 
-## Advanced Configuration
+## Files
 
-### Configuration Options
+### Core Files
+- `wifi_auto_login.py` - Main application script
+- `config.ini` - Configuration file with credentials
+- `requirements.txt` - Python dependencies
 
-All customization options are available in the `config.ini` file:
+### Batch Files
+- `direct_login.bat` - One-time login test
+- `start_wifi_login.bat` - Start continuous monitoring
+- `update_credentials.bat` - Update login credentials
+- `troubleshoot.bat` - Troubleshooting tool
 
-- **check_interval**: Change how often (in seconds) the script checks for connectivity
-- **username_field_id**, **password_field_id**, **login_button_id**: Adjust these if your hostel's login page uses different HTML element IDs
+### PowerShell Scripts
+- `add_to_startup.ps1` - Add to Windows startup
+- `update_credentials.py` - Credential update utility
 
-### Service Configuration
+### Directories
+- `logs/` - Application logs
 
-The service monitor checks every 5 minutes if the WiFi login process is running and restarts it if needed. You can modify this interval in `wifi_service_monitor.ps1`.
+## Development
 
-### Log Management
-
-- Logs are stored in the `logs/` directory
-- Log files are automatically rotated when they reach 1MB
-- Up to 5 backup log files are kept
-- Service monitor logs are in `logs/service_monitor.log`
-
-## Customization
-
-### Advanced Customization
-
-For more advanced customization, you can modify the Python script directly:
-
-- To run the browser visibly (not in headless mode), edit `wifi_auto_login.py` and remove or comment out the line `self.chrome_options.add_argument("--headless")`
-- To add additional browser options, modify the Chrome options in the `__init__` method
-- To change how the script detects internet connectivity, modify the `check_internet_connection` and `ping_test` methods
-- To adjust recovery behavior, modify the `max_consecutive_failures` and `max_consecutive_errors` variables
-
-## File Structure
-
+### Installing Dependencies
+```bash
+pip install -r requirements.txt
 ```
-Hostel/
-├── wifi_auto_login.py              # Main WiFi login script (enhanced)
-├── config.ini                      # Configuration file
-├── requirements.txt                # Python dependencies
-├── start_wifi_login.bat           # Enhanced startup script
-├── manage_service.bat             # Service management script
-├── wifi_service_monitor.ps1       # PowerShell service monitor
-├── auto_recovery_monitor.bat      # Automatic recovery monitor
-├── troubleshoot.bat               # Enhanced troubleshooting script
-├── logs/                          # Log directory (auto-created)
-│   ├── wifi_login.log             # Main application logs
-│   └── service_monitor.log        # Service monitor logs
-└── [other existing files...]
+
+### Running Tests
+```bash
+python wifi_auto_login.py --direct-login
 ```
+
+## License
+
+This project is provided as-is for educational and personal use.
 
 ## Support
 
 If you encounter issues:
-
-1. Run `troubleshoot.bat` first
-2. Check the logs in the `logs/` directory
-3. Try the service mode: `manage_service.bat install` then `manage_service.bat start`
-4. If problems persist, the enhanced version includes comprehensive error logging to help identify the issue
+1. Run `troubleshoot.bat`
+2. Check the logs in `logs/wifi_login.log`
+3. Verify your credentials in `config.ini`
+4. Make sure you're connected to the WiFi network

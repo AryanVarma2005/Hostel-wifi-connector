@@ -1,20 +1,13 @@
 @echo off
-echo ===== WiFi Auto Login Enhanced Startup =====
+echo ===== WiFi Auto Login Startup =====
 echo.
 
 echo Installing/updating required packages...
 pip install -r requirements.txt
 
 echo.
-echo Cleaning up any existing ChromeDriver cache...
-if exist "%USERPROFILE%\.wdm" (
-    rmdir /s /q "%USERPROFILE%\.wdm"
-    echo ChromeDriver cache cleaned.
-)
-
-echo.
-echo Starting WiFi Auto Login with enhanced error handling...
-echo The script will automatically recover from errors and restart if needed.
+echo Starting WiFi Auto Login...
+echo The script will automatically monitor your WiFi connection and login when needed.
 echo.
 
 :start_loop
