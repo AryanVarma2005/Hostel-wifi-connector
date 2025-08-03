@@ -1,0 +1,36 @@
+2025-08-03 14:17:14,188 - INFO - WiFi Auto Login initialized
+2025-08-03 14:17:14,188 - INFO - Starting WiFi connection monitoring
+2025-08-03 14:17:14,737 - INFO - Internet connection detected
+2025-08-03 14:43:02,735 - INFO - WiFi Auto Login initialized
+2025-08-03 14:43:02,735 - INFO - Starting WiFi connection monitoring
+2025-08-03 14:43:03,228 - INFO - Internet connection detected
+2025-08-03 14:43:20,950 - INFO - WiFi Auto Login stopped by user
+2025-08-03 14:47:03,138 - INFO - WiFi Auto Login initialized
+2025-08-03 14:47:03,139 - INFO - Starting WiFi connection monitoring
+2025-08-03 14:47:03,636 - INFO - Internet connection detected
+2025-08-03 14:47:14,817 - INFO - WiFi Auto Login stopped by user
+2025-08-03 14:50:24,964 - INFO - WiFi Auto Login initialized
+2025-08-03 14:50:24,964 - INFO - Starting WiFi connection monitoring
+2025-08-03 14:50:25,422 - INFO - Internet connection detected
+2025-08-03 14:55:09,266 - INFO - Direct login attempt triggered
+2025-08-03 14:55:09,268 - INFO - WiFi Auto Login initialized
+2025-08-03 14:55:09,268 - INFO - Attempting to login to WiFi portal
+2025-08-03 14:55:09,268 - INFO - ====== WebDriver manager ======
+2025-08-03 14:55:10,301 - INFO - Get LATEST chromedriver version for google-chrome
+2025-08-03 14:55:10,854 - INFO - Get LATEST chromedriver version for google-chrome
+2025-08-03 14:55:11,421 - INFO - Driver [C:\Users\dantu\.wdm\drivers\chromedriver\win64\138.0.7204.183\chromedriver-win32/THIRD_PARTY_NOTICES.chromedriver] found in cache
+2025-08-03 14:55:11,423 - ERROR - Error during login: [WinError 193] %1 is not a valid Win32 application
+2025-08-03 14:55:14,675 - INFO - WiFi Auto Login initialized
+2025-08-03 14:55:14,675 - INFO - Starting WiFi connection monitoring
+2025-08-03 14:55:15,515 - INFO - Internet connection detected
+2025-08-03 14:55:57,597 - INFO - Direct login attempt triggered
+2025-08-03 14:55:57,599 - INFO - WiFi Auto Login initialized
+2025-08-03 14:55:57,599 - INFO - Attempting to login to WiFi portal
+2025-08-03 14:55:57,599 - INFO - ====== WebDriver manager ======
+2025-08-03 14:55:58,719 - INFO - Get LATEST chromedriver version for google-chrome
+2025-08-03 14:55:59,379 - INFO - Get LATEST chromedriver version for google-chrome
+2025-08-03 14:55:59,977 - INFO - Driver [C:\Users\dantu\.wdm\drivers\chromedriver\win64\138.0.7204.183\chromedriver-win32/THIRD_PARTY_NOTICES.chromedriver] found in cache
+2025-08-03 14:55:59,979 - ERROR - Error during login: [WinError 193] %1 is not a valid Win32 application
+2025-08-03 14:56:03,247 - INFO - WiFi Auto Login initialized
+2025-08-03 14:56:03,247 - INFO - Starting WiFi connection monitoring
+2025-08-03 14:56:03,724 - INFO - Internet connection detected

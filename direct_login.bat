@@ -1,0 +1,3 @@
+@echo off
+echo Starting direct WiFi login...
+python wifi_auto_login.py --direct-login

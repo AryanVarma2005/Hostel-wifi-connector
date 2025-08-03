@@ -1,0 +1,6 @@
+@echo off
+echo Installing required packages...
+pip install -r requirements.txt
+
+echo Starting WiFi Auto Login...
+python wifi_auto_login.py
